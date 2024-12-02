@@ -1,0 +1,587 @@
+@extends('layouts.fontend_master2')
+
+@section('content')
+
+<style>
+    .red{color: red;padding-left:10px;}
+    .addnew{cursor: pointer;color: blue;text-decoration: underline;}
+    .form-control:focus {border-color: red;}
+    .form-group label{text-align: right !important;}
+</style>    
+
+<section class="section section-md bg-white">
+    <div class="shell shell-wide wow fadeInUpSmall divsize" data-wow-offset="150" style="margin-left: 0px;margin-right:0px;">
+    <div class="cat-items-grid">
+    <section id="home" class="home-page-content page-content">
+        <section class="products-section">
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="headerstyle">Auction Product Entry Request Form</h4>
+                    <p>
+                        If you want to send your valuable product information to our auction, Please first login by using your 
+                        "Login ID" and "Password" and then fill-up below form with proper information.
+                    </p>
+                    <br>
+                    <div id="login"> 
+                        <form id="form" action="" method="post" autocomplete="off">
+                        <dl>
+                        <dt style="color: #F5A64E;">{{$pagelanguage['LG_Login_ID']}}</dt>
+                        <dd>
+                            <input type="search" id="username" autocomplete="off" style="border:1px solid #fbe8d0;padding-left: 5px;color: #000;width: 180px;min-height:25px;" required>
+                        </dd>
+                        <dt style="color: #F5A64E;">{{$pagelanguage['LG_Password']}}</dt>
+                        <dd>
+                            <input type="password"  id="userpass" class="myclass"  autocomplete="off"   style="border:1px solid #fbe8d0;padding-left: 5px;color: #000;width: 180px;min-height:25px;" required>
+                        </dd>
+                        </dl>
+                        <input type="button" class="login button" value="{{$pagelanguage['LG_Login']}}" onclick="getproductownerdata(); return false;" style="border:1px solid #fbe8d0;margin-top: 10px;color:#F5A64E;">
+                        <br>
+                        <span id="errorloginmsg" style="display: none"></span>
+                        <br>
+                        <a class="forget" href="javascript:" data-toggle="modal" data-target="#forgetPasswordForm">{{$pagelanguage['LG_Forgot_Your_Password']}}</a>
+                        </form>
+                        
+                    </div>
+                    <br>
+                    <br>
+                    
+                </div>
+
+                <div class="card-body">
+                    
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show">
+                            <strong>Success!</strong> {{ session('success') }}
+                            <button type="button" class="close" data-dismiss="alert" style="float:right;">&times;</button>
+                        </div>
+                    @elseif(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <strong>Error!</strong> {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" style="float:right;">&times;</button>
+                    </div>    
+                    @endif
+                    
+                    <form action="{{route('product.store')}}" method="post" enctype="multipart/form-data">
+
+                        @csrf
+
+                        <input type="hidden" name="ownerid" id="ownerid">
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Company Name <span class="red">*</span></label>
+                            <div class="col-sm-6">
+                                <label id="company" autocomplete="off" class="form-control" style="background: #fff;text-align:left !important;" required ></label>
+                                @error('company')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Precident Name <span class="red">*</span></label>
+                            <div class="col-sm-6">
+                                <label id="precidentname" autocomplete="off" class="form-control" style="background: #fff;text-align:left !important;"></label>
+                                @error('precidentname')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Person In Inchagre <span class="red">*</span></label>
+                            <div class="col-sm-6">
+                                <label id="personininchage" autocomplete="off" class="form-control" style="background: #fff;text-align:left !important;" required ></label>
+                                @error('personininchage')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Category <span class="red">*</span></label>
+                            <div class="col-sm-6">
+                                <select name="category_id" id="categoryList" autocomplete="off" class="form-control @error('category_id') is-invalid @enderror" required>
+                                    <option></option>
+                                    @foreach($categories as $cat)
+                                    <option value="{{$cat->id}}">{{ $cat->name_en }}</option>
+                                    @endforeach
+                                </select>
+                                
+                                if not exist, click on <a href="{{route('category.add_form')}}" onclick="return confirm('Are you shure want to add new category. Before leave this page, Please save informaton in draft')">Add New</a>
+                                
+                                @error('category_id')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Brand </label>
+                            <div class="col-sm-6">
+                                <select name="brand_id" id="brandList" autocomplete="off" class="form-control @error('brand_id') is-invalid @enderror" >
+                                    <option></option>
+                                    @foreach($brands as $brand)
+                                    <option value="{{$brand->id}}">{{ $brand->name_en }}</option>
+                                    @endforeach
+                                </select>
+                                if not exist, click on <a href="{{route('brand.add_form')}}" onclick="return confirm('Are you shure want to add new brand. Before leave this page, Please save informaton in draft')">Add New</a>
+
+                                @error('brand_id')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Model No </label>
+                            <div class="col-sm-6">
+                                <input type="text"  name="model_no" id="model_no" autocomplete="off" class="form-control @error('model_no') is-invalid @enderror" 
+                                placeholder="Product model number" value="{{old('model_no')}}" >
+                                @error('model_no')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Serial No </label>
+                            <div class="col-sm-6">
+                                <input type="text"  name="serial_no" id="serial_no" autocomplete="off" class="form-control @error('serial_no') is-invalid @enderror" 
+                                placeholder="Product serial number" value="{{old('serial_no')}}" >
+                                @error('serial_no')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Product Year</label>
+                            <div class="col-sm-6">
+                                <input type="number"  name="model_year" id="model_year" autocomplete="off" class="form-control @error('model_year') is-invalid @enderror" 
+                                placeholder="Product year" value="{{old('model_year')}}">
+                                @error('model_year')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Used hours</label>
+                            <div class="col-sm-6">
+                                <input type="number"  name="used_hour" id="used_hour" autocomplete="off" class="form-control @error('used_hour') is-invalid @enderror" 
+                                placeholder="Product used hours" value="{{old('used_hour')}}">
+                                @error('used_hour')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="buy_price" value="0">
+                        
+
+                        <input type="hidden" name="sale_price" value="0">
+                        
+
+                        <input type="hidden" name="short_description" value="...">
+                       
+
+                        <input type="hidden" name="short_description_jp" value="...">
+
+                        
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Details Description </label>
+                            <div class="col-sm-6">
+                                <textarea  name="long_description" id="long_description" autocomplete="off" class="form-control @error('long_description') is-invalid @enderror"
+                                    placeholder="Product Details Description" style="min-height: 120px">{{old('long_description')}}</textarea>
+                                @error('long_description')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="long_description_jp" id="long_description_jp" value="Details Description (JP)">
+                        
+
+
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Delivery Place </label>
+                            <div class="col-sm-6">
+                                <select type="text"  name="delivery_place_id" id="delivery_place_id"  class="form-control" style="width: 50%;float: left;" >
+                                    <option value="" selected="selected">---</option>
+                                    @foreach($deliveryplaces as $deliverypl)
+                                    <option value="{{$deliverypl->id}}">{{ $deliverypl->name_en }}</option>
+                                    @endforeach
+                                </select>
+                                <select type="text"  name="delivery_status" id="delivery_status"  class="form-control" style="width: 50%;display: inline-block;">
+                                    <option value="" selected="selected">---</option>
+                                      <option value="Arrived">Arrived(搬入済) </option>
+                                      <option value="Coming">Coming (未搬入)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="releasing_charge" value="0">
+                        
+
+                        
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Product Conditional Report</label>
+                            <div class="col-sm-6">
+                                <input type="file"  name="conditional_report"   class="form-control @error('conditional_report') is-invalid @enderror" >
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Product Main Image <span class="red">*</span></label>
+                            <div class="col-sm-6">
+                                <input type="file"  name="thumbnail_image" id="imgInp"  class="form-control @error('productimage') is-invalid @enderror" 
+                                onchange="loadFile(event)" required>
+                                    <img src="{{asset('fontend/images/product-image-size.jpg')}}" id="output" style="width: 300px;height:225px;margin-top:10px;border:1px solid #ccc;">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Product Multiple Image Zip File <span class="red">*</span></label>
+                            <div class="col-sm-6">
+                                <input type="file"  name="imagezipfile"   class="form-control @error('imagezipfile') is-invalid @enderror" required>
+                            </div>
+                        </div>
+                        
+
+                        
+                        
+
+                        <input type="hidden" name="stock" value="available">
+                        
+
+                        <input type="hidden" name="publish_status" value="active">
+                        
+
+                        <input type="hidden" name="allow_comment" value="no">
+                        
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">Video Url (Youtube)</label>
+                            <div class="col-sm-6">
+                                <input type="text"  name="videourl" id="youtubevideolink" onkeyup="loadvideo();" autocomplete="off" class="form-control @error('videourl') is-invalid @enderror" 
+                                placeholder="Product youtube video url" value="{{old('videourl')}}">
+                                @error('videourl')
+                                    <span class="text-danger"> {{$message}}  </span>
+                                @enderror
+                                open video in youtube, click on share link button, copy video url 
+                            </div>
+                        </div>
+
+                        
+
+                        <div class="form-group row">
+                            <label for="fname"
+                                class="col-sm-3 text-end control-label col-form-label">&nbsp;</label>
+                            <div class="col-sm-6">
+                                
+                                <iframe width="300" height="225" id="videourl" src="">
+                                </iframe>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-0">
+                            <div class="col-md-9 offset-md-3">
+                                <button type="submit" class="btn btn-primary" style="float: right">
+                                    Send to Mail
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                    
+
+                    
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+        </section>
+    </section>
+    </div>
+    </div>
+</section>
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script>
+    //multiple seleted image show    
+    $(function() {
+      $("#productmultipleimage").change(function() {
+        if (this.files && this.files[0]) {
+          for (var i = 0; i < this.files.length; i++) {
+            var reader = new FileReader();
+            reader.onload = imageIsLoaded;
+            reader.readAsDataURL(this.files[i]);
+          }
+        }
+      });
+    });
+    
+    function imageIsLoaded(e) {
+      $('#myImg').append('<img src=' + e.target.result + ' style="width:100px;height:100px">');
+    };
+</script>
+
+<script>
+    var loadFile = function(event) {
+      var output = document.getElementById('output');
+      output.src = URL.createObjectURL(event.target.files[0]);
+      output.onload = function() {
+        URL.revokeObjectURL(output.src) // free memory
+      }
+    };
+  </script>
+
+<script>
+    var videoplayer = document.getElementById('videourl');
+    videoplayer.style.display="none";
+    function loadvideo()
+    {
+        //alert('paisi');
+        var youtubevideolink = document.getElementById('youtubevideolink').value;  //alert(youtubevideolink);
+        if(youtubevideolink != "")
+        {
+            youtubevideolink = youtubevideolink.replace("https://youtu.be/", "https://www.youtube.com/embed/");  //alert(youtubevideolink);
+            videoplayer.style.display="block";
+            //var videoplayer = document.getElementById('videourl');
+            videoplayer.src = youtubevideolink;
+            videoplayer.play();
+        }
+    }
+</script>
+
+<script>
+    document.getElementById('newcaten').style.display="none";
+    document.getElementById('newcatjp').style.display="none";
+    $('#newcategory').click(function(){
+        document.getElementById('newcaten').style.display="block";
+        document.getElementById('newcatjp').style.display="block";
+    });
+    
+    document.getElementById('newbranden').style.display="none";
+    document.getElementById('newbrandjp').style.display="none";
+    $('#newbrandid').click(function(){
+        document.getElementById('newbranden').style.display="block";
+        document.getElementById('newbrandjp').style.display="block";
+    });
+</script>
+<script>
+    function commagenerate(idname)
+    {
+        var idvalue = document.getElementById(idname).value;
+        if(idvalue !="")
+        {
+            idvalue = idvalue.replace(/,/g, '');
+            if(isNaN(idvalue) == false)
+            {
+                idvalue = parseInt(idvalue, 10).toLocaleString('en-US'); //alert(idvalue);
+                document.getElementById(idname).value = idvalue;	
+            }
+        }
+    }
+  </script>
+  <script>
+    function setTempData()
+    {  
+      var wonerList = document.getElementById('wonerList').value;
+      var categoryList = document.getElementById('categoryList').value;
+      var brandList = document.getElementById('brandList').value;
+      var model_no = document.getElementById('model_no').value;
+      var serial_no = document.getElementById('serial_no').value;
+      var model_year = document.getElementById('model_year').value;  
+      var used_hour = document.getElementById('used_hour').value;
+      var long_description = document.getElementById('long_description').value;   
+      var long_description_jp = document.getElementById('long_description_jp').value;  
+      var delivery_place_id = document.getElementById('delivery_place_id').value;  
+      var delivery_status = document.getElementById('delivery_status').value;
+      //var releasing_charge = document.getElementById('releasing_charge').value; 
+      var releasing_charge = "";
+      var youtubevideolink = document.getElementById('youtubevideolink').value;    //alert('youtubevideolink');
+  
+      $.ajax({
+              type:'POST',
+              url: '/product/set_productdata_in_temp',
+              data: {
+                    "_token": "{{ csrf_token() }}",
+                    "wonerList": wonerList,
+                    "categoryList": categoryList,
+                    "brandList": brandList,
+                    "model_no": model_no,
+                    "serial_no": serial_no,
+                    "model_year": model_year,
+                    "used_hour": used_hour,
+                    "long_description": long_description,
+                    "long_description_jp": long_description_jp,
+                    "delivery_place_id": delivery_place_id,
+                    "delivery_status": delivery_status,
+                    "releasing_charge": releasing_charge,
+                    "youtubevideolink": youtubevideolink,
+                },
+              dataType:'json',
+              success:function(response){
+                  alert(response.successmsg);
+              }
+          })
+    }
+    function getTempData()
+    {
+      $.ajax({
+              type:'get',
+              url: '/product/get_productdata_from_temp',
+              dataType:'json',
+              success:function(data){
+                for(var i=0; i < document.getElementById('wonerList').options.length; i++)
+                {
+                    if(document.getElementById('wonerList').options[i].value === data.wonerList) {
+                        document.getElementById('wonerList').selectedIndex = i;
+                        break;
+                    }
+                }
+                for(var i=0; i < document.getElementById('categoryList').options.length; i++)
+                {
+                    if(document.getElementById('categoryList').options[i].value === data.categoryList) {
+                        document.getElementById('categoryList').selectedIndex = i;
+                        break;
+                    }
+                }
+                for(var i=0; i < document.getElementById('brandList').options.length; i++)
+                {
+                    if(document.getElementById('brandList').options[i].value === data.brandList) {
+                        document.getElementById('brandList').selectedIndex = i;
+                        break;
+                    }
+                }
+                  //document.getElementById('wonerList').value = data.wonerList;
+                  //document.getElementById('categoryList').value = data.categoryList;
+                  //document.getElementById('brandList').value = data.brandList;
+                  document.getElementById('model_no').value = data.model_no;
+                  document.getElementById('serial_no').value = data.serial_no;
+                  document.getElementById('model_year').value = data.model_year;
+                  document.getElementById('used_hour').value = data.used_hour;
+                  document.getElementById('long_description').value = data.long_description;
+                  document.getElementById('long_description_jp').value = data.long_description_jp;
+                  for(var i=0; i < document.getElementById('delivery_place_id').options.length; i++)
+                    {
+                        if(document.getElementById('delivery_place_id').options[i].value === data.delivery_place_id) {
+                            document.getElementById('delivery_place_id').selectedIndex = i;
+                            break;
+                        }
+                    }
+                  //document.getElementById('delivery_place_id').value = data.delivery_place_id;
+                  for(var i=0; i < document.getElementById('delivery_status').options.length; i++)
+                    {
+                        if(document.getElementById('delivery_status').options[i].value === data.delivery_status) {
+                            document.getElementById('delivery_status').selectedIndex = i;
+                            break;
+                        }
+                    }
+                  //document.getElementById('delivery_status').value = data.delivery_status;
+                  //document.getElementById('releasing_charge').value = data.releasing_charge;
+                  document.getElementById('youtubevideolink').value = data.youtubevideolink;  
+              }
+          })
+  
+    }
+
+    function getproductownerdata()
+  {
+    var username = document.getElementById('username').value;
+    var userpass = document.getElementById('userpass').value; 
+    if(username !="" && userpass !="")
+    {
+      //alert(username);
+      $.ajax({
+                type:'GET',
+                url: '/auction/getproductownerdata',
+                data: {
+                      "_token": "{{ csrf_token() }}",
+                      "username":username,
+                      "password":userpass,
+                  },
+                dataType:'json',
+                success:function(data)
+                {                           
+                  //location.reload();
+                  if(data.loginstatus ==1)
+                  {
+                    //login ok
+                    document.getElementById('username').value = "";
+                    document.getElementById('userpass').value = "";   
+
+                    document.getElementById('ownerid').value = data.ownerid;
+                    document.getElementById('company').innerHTML = data.company;
+                    document.getElementById('precidentname').innerHTML = data.precidentname;
+                    document.getElementById('personininchage').innerHTML = data.personininchage;
+                    
+                  }
+                  else if(data.loginstatus == 0)
+                  {
+                    document.getElementById('username').value = "";
+                    document.getElementById('userpass').value = ""; 
+                   // errorloginmsg
+                   if(data.language == 'en')
+                   {
+                    document.getElementById('errorloginmsg').innerHTML = "LoginID or Password is incorrect";
+                   }
+                   else
+                   {
+                    document.getElementById('errorloginmsg').innerHTML = "ログインIDまたはパスワードが違います。";
+                   }
+                    
+                    document.getElementById('errorloginmsg').style.color="red";
+                    document.getElementById('errorloginmsg').style.width="100%";
+                    document.getElementById('errorloginmsg').style.fontSize ="11px";
+                    // document.getElementById('errorloginmsg').style.border="1px solid red";
+                    document.getElementById('errorloginmsg').style.margin="10px 0 0 0";
+                    document.getElementById('errorloginmsg').style.padding="2px 0 0 5px";
+                    document.getElementById('errorloginmsg').style.display="block";
+
+                    //alert('UserID or Password is incorrect');
+                  }
+                  else 
+                  {
+                    document.getElementById('login').style.display="block";
+                  }
+                  
+
+                }
+    
+            })
+    }     
+
+  }
+  </script>
+
+@endsection
+
+
